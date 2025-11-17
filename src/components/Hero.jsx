@@ -1,10 +1,33 @@
-import Spline from '@splinetool/react-spline'
+import { useEffect, useState } from 'react'
 
 export default function Hero() {
+  const [SplineComp, setSplineComp] = useState(null)
+
+  useEffect(() => {
+    let mounted = true
+    // Dynamically import Spline on client to avoid crashes in environments without WebGL
+    import('@splinetool/react-spline')
+      .then((mod) => {
+        if (mounted) setSplineComp(() => mod.default)
+      })
+      .catch(() => {
+        // fail silently; we'll show gradient fallback
+      })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const Spline = SplineComp
+
   return (
     <section id="top" className="relative h-[90vh] w-full overflow-hidden">
       <div className="absolute inset-0">
-        <Spline scene="https://prod.spline.design/atN3lqky4IzF-KEP/scene.splinecode" style={{ width: '100%', height: '100%' }} />
+        {Spline ? (
+          <Spline scene="https://prod.spline.design/atN3lqky4IzF-KEP/scene.splinecode" style={{ width: '100%', height: '100%' }} />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-b from-[#0c0c14] via-[#0a0a12] to-black" />
+        )}
       </div>
 
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
